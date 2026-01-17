@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIAKAD Mini</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <div class="max-w-4xl mx-auto mt-10 bg-white p-6 rounded shadow">
+    <h1 class="text-3xl font-bold text-center mb-6">
+      Sistem Informasi Akademik (SIAKAD) Mini
+    </h1>
+
+    <!-- FORM INPUT -->
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold mb-2">Tambah Mahasiswa</h2>
+      <input id="nama" class="border p-2 w-full mb-2" placeholder="Nama">
+      <input id="nim" class="border p-2 w-full mb-2" placeholder="NIM">
+      <input id="prodi" class="border p-2 w-full mb-2" placeholder="Prodi">
+      <button onclick="tambahMahasiswa()"
+        class="bg-blue-600 text-white px-4 py-2 rounded">
+        Simpan
+      </button>
+    </div>
+
+    <!-- TABEL -->
+    <table class="w-full border">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="p-2">ID</th>
+          <th class="p-2">Nama</th>
+          <th class="p-2">NIM</th>
+          <th class="p-2">Prodi</th>
+        </tr>
+      </thead>
+      <tbody id="data-mahasiswa" class="text-center"></tbody>
+    </table>
+  </div>
+
+  <!-- SCRIPT (HARUS DI PALING BAWAH) -->
+  <script>
+    const API = "https://siakad-api.siakad-mini-stephanus.workers.dev/mahasiswa";
+
+    function loadMahasiswa() {
+      fetch(API)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById("data-mahasiswa");
+          tbody.innerHTML = "";
+          data.forEach(m => {
+            tbody.innerHTML += `
+              <tr class="border-b">
+                <td class="p-2">${m.id}</td>
+                <td class="p-2">${m.nama}</td>
+                <td class="p-2">${m.nim}</td>
+                <td class="p-2">${m.prodi}</td>
+              </tr>
+            `;
+          });
+        })
+        .catch(err => {
+          alert("Gagal memuat data");
+          console.error(err);
+        });
+    }
+
+    function tambahMahasiswa() {
+      const nama = document.getElementById("nama").value.trim();
+      const nim = document.getElementById("nim").value.trim();
+      const prodi = document.getElementById("prodi").value.trim();
+
+      if (!nama || !nim || !prodi) {
+        alert("Semua field wajib diisi!");
+        return;
+      }
+
+      fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nama, nim, prodi })
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Gagal menyimpan data");
+        }
+        return res.json();
+      })
+      .then(() => {
+        document.getElementById("nama").value = "";
+        document.getElementById("nim").value = "";
+        document.getElementById("prodi").value = "";
+        loadMahasiswa();
+      })
+      .catch(err => {
+        alert("Error saat menyimpan data");
+        console.error(err);
+      });
+    }
+
+    // load awal
+    loadMahasiswa();
+  </script>
+
+</body>
+</html>
